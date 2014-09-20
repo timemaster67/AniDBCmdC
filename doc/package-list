@@ -1,0 +1,11 @@
+anidbcmdc.exceptions
+anidbcmdc.impl
+anidbcmdc.ui
+anidbcmdc.util
+gnu.crypto
+gnu.crypto.hash
+gnu.crypto.util
+gnu.getopt
+jonelo.jacksum
+jonelo.jacksum.algorithm
+jonelo.sugar.util
