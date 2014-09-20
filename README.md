@@ -1,4 +1,4 @@
 AniDBCmdC
 =========
 
-AniDB UPD command line program to scann files and add them to mylist
+AniDB UPD command line program to scan files, rename them and add them to mylist
