@@ -263,13 +263,9 @@ public class FileUtils {
 	}
 
 	public static File moveFile(File file, String newPath) throws IOException {
-		File f2 = new File(newPath);
-		return file.renameTo(f2) ? f2 : null;
 		//Files.move vas soit faire un RenameTo qui ne fonctionne qu'à l'intérieur du même système de fichier sur unix
 		//ou bien un copy/delete vers un autre système de fichier.
-		//return Files.move(file.toPath(), Paths.get(newPath)).toFile();
-		
-		
+		return Files.move(file.toPath(), Paths.get(newPath)).toFile();
 	}
 
 	public static File[] removeFilesWithStringInPathFromArray(File[] f,
