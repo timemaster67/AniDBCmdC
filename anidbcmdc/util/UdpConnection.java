@@ -2,6 +2,7 @@
  *
  * AniDBCmdC version 1.0 - AniDB client in Java
  * Copyright (C) 2005 ExElNeT
+ * Copyright (C) 2014 Timemaster
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or
