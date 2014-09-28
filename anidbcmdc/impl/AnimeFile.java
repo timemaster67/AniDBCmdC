@@ -246,10 +246,15 @@ private void parseAniDBWebsite() throws IOException {
      */
     public String createFilename(String style) {
         style = style.trim();
-        String separatorAnime = style.substring(style.indexOf("%animenamepart1") + 15, style.indexOf("%animenamepart2"));
-        String separatorEp = style.substring(style.indexOf("%epnamepart1") + 12, style.indexOf("%epnamepart2"));
-        animeName = animeName.replaceAll(" ", separatorAnime);
-        epName = epName.replaceAll(" ", separatorEp);
+        if ((style.indexOf("%animenamepart1") != -1) && (style.indexOf("%animenamepart2") != -1)){
+        	String separatorAnime = style.substring(style.indexOf("%animenamepart1") + 15, style.indexOf("%animenamepart2"));
+        	animeName = animeName.replaceAll(" ", separatorAnime);
+        }
+        if ((style.indexOf("%epnamepart1") != -1) && (style.indexOf("%epnamepart2") != -1)){
+            String separatorEp = style.substring(style.indexOf("%epnamepart1") + 12, style.indexOf("%epnamepart2"));
+            epName = epName.replaceAll(" ", separatorEp);
+        }
+                
         style = style.replaceFirst("%animenamepart1.*%animenamepart2", animeName);
         style = style.replaceFirst("%epnamepart1.*%epnamepart2", epName);
         style = GeneralString.replaceAllStrings(style, "%epnr", String.valueOf(epNr));
