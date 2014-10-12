@@ -27,6 +27,7 @@ package anidbcmdc.ui;
 
 import java.io.File;
 
+import jonelo.sugar.util.GeneralString;
 import anidbcmdc.impl.AniDBUdpApiConnection;
 import anidbcmdc.impl.AnimeFile;
 import anidbcmdc.impl.Options;
@@ -222,6 +223,12 @@ public class Console {
 								if (options.getMoveFinishedDir() != null) {
 									if (options.isAnimeTree()) {
 										String anime = animeFile.getAnimeName();
+										
+										//Clean the directory name the say way as the file name using the replace list. 
+										anime = FileUtils.ReplaceFileName(anime, options.getReplaceList());
+										//Also remove any directory separator as we use it to define the full destination path
+										anime = GeneralString.replaceAllStrings(anime, File.separator, "");
+																				
 										String moveDir = options
 												.getMoveFinishedDir().getAbsolutePath();
 										String animeDir = moveDir + File.separator + anime;

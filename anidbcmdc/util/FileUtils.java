@@ -201,6 +201,30 @@ public class FileUtils {
 	 */
 	public static File renameFile(File file, String newFilename,
 			String[] replaceList) throws IOException {
+		
+		newFilename = ReplaceFileName(newFilename, replaceList);
+		File f2 = new File(file.getParent() + File.separator + newFilename);
+		//return file.renameTo(f2) ? f2 : null;
+		if (file.renameTo(f2)){
+			return f2;
+		}else{
+			throw new IOException("Impossible de renommer le fichier " + file.getName());
+		}
+
+	}
+	
+	
+	/**
+	 * replaces all Strings in a file or directory name like described in replaceList.
+	 * 
+	 * @param Filename -
+	 *            The original filename to be renamed 
+	 * @param replaceList -
+	 *            A list of replacement instructions. Syntax: ab->ba
+	 * @return - The renamed file
+	 */
+	public static String ReplaceFileName(String Filename, String[] replaceList)  {
+		String newFilename = Filename;
 		if (replaceList != null) {
 			String[] sourceReplace = new String[replaceList.length];
 			String[] destReplace = new String[replaceList.length];
@@ -236,13 +260,8 @@ public class FileUtils {
 		}
 		newFilename = GeneralString.replaceAllStrings(newFilename, "/", "");
 		newFilename = GeneralString.replaceAllStrings(newFilename, "\\", "");
-		File f2 = new File(file.getParent() + File.separator + newFilename);
-		//return file.renameTo(f2) ? f2 : null;
-		if (file.renameTo(f2)){
-			return f2;
-		}else{
-			throw new IOException("Impossible de renommer le fichier " + file.getName());
-		}
+		
+		return newFilename;
 
 	}
 
