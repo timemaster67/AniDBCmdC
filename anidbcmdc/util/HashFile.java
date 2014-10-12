@@ -51,12 +51,6 @@ public class HashFile {
 	private long size;
 
 	/**
-	 * Not needed here we should always know a file, so private.
-	 */
-	private HashFile() {
-	}
-
-	/**
 	 * Creates a new HashFile object and computes the size of the file.
 	 * 
 	 * @param file -

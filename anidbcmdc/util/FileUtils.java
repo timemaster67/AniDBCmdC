@@ -30,12 +30,8 @@ import java.io.*;
 import jonelo.sugar.util.*;
 
 import java.util.ArrayList;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import anidbcmdc.exceptions.UnknownReplyException;
 
 /**
  * <p>
@@ -73,21 +69,21 @@ public class FileUtils {
 	 *            If true regular expressions are enabled
 	 * @return An ArrayList of files
 	 */
-	private static ArrayList getFiles(File f, File startFile, boolean regex) {
+	private static ArrayList<File> getFiles(File f, File startFile, boolean regex) {
 		if (f.isDirectory()) {
 			// result ArrayList with all files
-			ArrayList result = new ArrayList();
+			ArrayList<File> result = new ArrayList<File>();
 			// cast File[] to result ArrayList
 			result = MiscUtils.addArrayToArrayList(result, f.listFiles());
 			// remove dirs from result ArrayList
 			for (int i = 0; i < result.size(); i++) {
-				if (((File) result.get(i)).isDirectory())
+				if (result.get(i).isDirectory())
 					result.remove(i);
 			}
 			return result;
 		} else {
 			// result ArrayList with all files
-			ArrayList result = new ArrayList();
+			ArrayList<File> result = new ArrayList<File>();
 			// filter for listFiles(FileFilter)
 			RegexFilter filter = new RegexFilter(startFile.getName(), regex);
 			// get all files with which match f.getName()
@@ -95,7 +91,7 @@ public class FileUtils {
 					.listFiles(filter));
 			// remove dirs from result ArrayList
 			for (int i = 0; i < result.size(); i++) {
-				if (((File) result.get(i)).isDirectory())
+				if (result.get(i).isDirectory())
 					result.remove(i);
 			}
 			return result;
@@ -114,9 +110,9 @@ public class FileUtils {
 	 *            enables regular expressions
 	 * @return - An ArrayList of files
 	 */
-	private static ArrayList getRecursiveFiles(File f, File startFile,
+	private static ArrayList<File> getRecursiveFiles(File f, File startFile,
 			boolean regex) {
-		ArrayList temp = new ArrayList();
+		ArrayList<File> temp = new ArrayList<File>();
 		if (f.isDirectory()) {
 			// add all files and dirs under this dir to temp
 			temp = MiscUtils.addArrayToArrayList(temp, f.listFiles());
@@ -126,9 +122,9 @@ public class FileUtils {
 					.listFiles());
 		}
 		// result ArrayList with all files in subdirs
-		ArrayList result = new ArrayList();
+		ArrayList<File> result = new ArrayList<File>();
 		for (int i = 0; i < temp.size(); i++) {
-			File current = (File) temp.get(i);
+			File current = temp.get(i);
 			// recursive start of getRecursiveFiles
 			if (current.isDirectory()) {
 				result.addAll(getRecursiveFiles(current, startFile, regex));
@@ -159,29 +155,29 @@ public class FileUtils {
 	 */
 	public static File[] getFiles(File[] files, boolean recursive, boolean regex) {
 		// cast File[] to ArrayList
-		ArrayList file = new ArrayList();
+		ArrayList<File> file = new ArrayList<File>();
 		file = MiscUtils.addArrayToArrayList(file, files);
 		// ArrayList with all files from subdirs or dirs in files
-		ArrayList tmpResult = new ArrayList();
+		ArrayList<File> tmpResult = new ArrayList<File>();
 		if (recursive) {
 			// get all files in subdirs files
 			for (int i = 0; i < file.size(); i++) {
-				File current = (File) file.get(i);
-				ArrayList arr = getRecursiveFiles(current, current, regex);
+				File current = file.get(i);
+				ArrayList<File> arr = getRecursiveFiles(current, current, regex);
 				tmpResult.addAll(arr);
 			}
 		} else {
 			// get all files in dirs files
 			for (int i = 0; i < file.size(); i++) {
-				File current = (File) file.get(i);
-				ArrayList arr = getFiles(current, current, regex);
+				File current = file.get(i);
+				ArrayList<File> arr = getFiles(current, current, regex);
 				tmpResult.addAll(arr);
 			}
 		}
 		// cast ArrayList to File[]
 		File[] result = new File[tmpResult.size()];
 		for (int i = 0; i < tmpResult.size(); i++)
-			result[i] = (File) tmpResult.get(i);
+			result[i] = tmpResult.get(i);
 		return result;
 	}
 
@@ -292,15 +288,15 @@ public class FileUtils {
 			String path) {
 		//Fonction qui enlève les fichiers qui sont déjà dans le Finished Dir
 		//Je ne comprend pas à quoi cela peut être utilisé, c'est à l'humain de décider quoi re-scanner et re-déplacer 
-		ArrayList removeList = new ArrayList();
+		ArrayList<File> removeList = new ArrayList<File>();
 		MiscUtils.addArrayToArrayList(removeList, f);
 		for (int i = 0; i < removeList.size(); i++) {
-			if (((File) removeList.get(i)).getAbsolutePath().indexOf(path) != -1)
+			if (removeList.get(i).getAbsolutePath().indexOf(path) != -1)
 				removeList.remove(i);
 		}
 		File[] result = new File[removeList.size()];
 		for (int i = 0; i < removeList.size(); i++)
-			result[i] = (File) removeList.get(i);
+			result[i] = removeList.get(i);
 		return result;
 	}
 }

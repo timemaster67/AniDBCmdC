@@ -57,12 +57,6 @@ public class Console {
 	public boolean booErrorOccurred;
 
 	/**
-	 * Not needed here so private
-	 */
-	private Console() {
-	}
-
-	/**
 	 * Will check if enough options were passed and if not throw an errormessage
 	 * 
 	 * @param options -
