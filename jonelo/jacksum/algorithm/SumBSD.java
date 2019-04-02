@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- * Jacksum version 1.5.0 - checksum utility in Java
- * Copyright (C) 2001-2004  Dipl.-Inf. (FH) Johann Nepomuk Loefflmann,
+ * Jacksum version 1.7.0 - checksum utility in Java
+ * Copyright (C) 2001-2006  Dipl.-Inf. (FH) Johann Nepomuk Loefflmann,
  * All Rights Reserved, http://www.jonelo.de
  *
  * This program is free software; you can redistribute it and/or
@@ -24,34 +24,42 @@
 
 package jonelo.jacksum.algorithm;
 
+import jonelo.jacksum.util.Service;
+
+
 public class SumBSD extends AbstractChecksum {
 
-	public SumBSD() {
-		super();
-		separator = " ";
-	}
+    public SumBSD() {
+        super();
+        separator = " ";
+    }
 
-	/** implemented from original GNU C source */
-	public void update(byte b) {
-		value = (value >> 1) + ((value & 1) << 15);
-		value += b & 0xFF;
-		value &= 0xffff;
-		length++;
-	}
+    /** implemented from original GNU C source */
+    public void update(byte b) {
+        value = (value >> 1) + ((value & 1) << 15);
+        value += b & 0xFF;
+        value &= 0xffff;
+        length++;
+    }
 
-	public String toString() {
-		long kb = (length + 1023) / 1024;
-		return ((hex ? getHexValue() : Service.format(getValue(), "00000"))
-				+ separator
-				+ Service.right(kb, 5)
-				+ separator
-				+ (isTimestampWanted() ? getTimestampFormatted() + separator
-						: "") + getFilename());
-	}
+    public void update(int b) {
+        update((byte)(b & 0xFF));
+    }
 
-	public String getHexValue() {
-		String s = Service.hexformat(getValue(), 4);
-		return (uppercase ? s.toUpperCase() : s);
-	}
+    public String toString() {
+        long  kb = (length + 1023) / 1024;
+        return ( (getEncoding().length()==0) ? Service.decformat(getValue(),"00000") : getFormattedValue() )
+        +separator+Service.right(kb,5)+separator+
+        (isTimestampWanted() ? getTimestampFormatted() + separator : "") +
+        getFilename();
+    }
+
+    public byte[] getByteArray() {
+        long val = getValue();
+        return new byte[]
+        {(byte)((val>>8)&0xff),
+         (byte)(val&0xff)};
+    }
+
 
 }

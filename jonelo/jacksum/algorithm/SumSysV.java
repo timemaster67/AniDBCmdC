@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- * Jacksum version 1.5.0 - checksum utility in Java
- * Copyright (C) 2001-2004 Dipl.-Inf. (FH) Johann Nepomuk Loefflmann,
+ * Jacksum version 1.7.0 - checksum utility in Java
+ * Copyright (C) 2001-2006 Dipl.-Inf. (FH) Johann Nepomuk Loefflmann,
  * All Rights Reserved, http://www.jonelo.de
  *
  * This program is free software; you can redistribute it and/or
@@ -27,34 +27,40 @@ package jonelo.jacksum.algorithm;
 // implemented in Java from original GNU C source
 public class SumSysV extends AbstractChecksum {
 
-	public SumSysV() {
-		super();
-		separator = " ";
-	}
+    public SumSysV() {
+        super();
+        separator = " ";
+    }
 
-	public void update(int b) {
-		value += b & 0xFF;
-		length++;
-	}
+    public void update(int b) {
+        value += b & 0xFF;
+        length++;
+    }
 
-	public long getValue() {
-		long r = (value & 0xffff) + (((value & 0xffffffff) >> 16) & 0xffff);
-		value = (r & 0xffff) + (r >> 16);
-		return value;
-	}
+    public void update(byte b) {
+        value += b & 0xFF;
+        length++;
+    }
 
-	public String toString() {
-		long kb = (length + 511) / 512;
-		return ((hex ? getHexValue() : Long.toString(getValue()))
-				+ separator
-				+ kb
-				+ separator
-				+ (isTimestampWanted() ? getTimestampFormatted() + separator
-						: "") + filename);
-	}
+    public long getValue() {
+        long r = (value & 0xffff) + (((value & 0xffffffff) >> 16) & 0xffff);
+        value = (r & 0xffff) + (r >> 16);
+        return value;
+    }
 
-	public String getHexValue() {
-		String s = Service.hexformat(getValue(), 4);
-		return (uppercase ? s.toUpperCase() : s);
-	}
+    public String toString() {
+        long kb = (length + 511) / 512;
+        return getFormattedValue()
+        + separator + kb + separator +
+        (isTimestampWanted() ? getTimestampFormatted() + separator : "") +
+        filename;
+    }
+
+    public byte[] getByteArray() {
+        long val = getValue();
+        return new byte[]
+        {(byte)((val>>8)&0xff),
+         (byte)(val&0xff)};
+    }
+
 }

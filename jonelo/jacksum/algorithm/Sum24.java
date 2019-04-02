@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- * Jacksum version 1.5.0 - checksum utility in Java
- * Copyright (C) 2001-2004 Dipl.-Inf. (FH) Johann Nepomuk Loefflmann,
+ * Jacksum version 1.7.0 - checksum utility in Java
+ * Copyright (C) 2001-2006 Dipl.-Inf. (FH) Johann Nepomuk Loefflmann,
  * All Rights Reserved, http://www.jonelo.de
  *
  * This program is free software; you can redistribute it and/or
@@ -26,18 +26,22 @@ package jonelo.jacksum.algorithm;
 
 public class Sum24 extends Sum8 {
 
-	public Sum24() {
-		super();
-		value = 0;
-	}
+    public Sum24() {
+        super();
+        value = 0;
+    }
 
-	public long getValue() {
-		return value % 0x1000000; // 2^24
-	}
+    public long getValue() {
+        return value % 0x1000000; // 2^24
+    }
 
-	public String getHexValue() {
-		String s = Service.hexformat(getValue(), 6); // 3 bytes
-		return (uppercase ? s.toUpperCase() : s);
-	}
+    public byte[] getByteArray() {
+        long val = getValue();
+        return new byte[]
+        {(byte)((val>>16)&0xff),
+         (byte)((val>>8)&0xff),
+         (byte)(val&0xff)};
+    }
 
 }
+

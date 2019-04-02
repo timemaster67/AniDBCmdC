@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- * Jacksum version 1.5.0 - checksum utility in Java
- * Copyright (C) 2001-2004 Dipl.-Inf. (FH) Johann Nepomuk Loefflmann,
+ * Jacksum version 1.7.0 - checksum utility in Java
+ * Copyright (C) 2001-2006 Dipl.-Inf. (FH) Johann Nepomuk Loefflmann,
  * All Rights Reserved, http://www.jonelo.de
  *
  * This program is free software; you can redistribute it and/or
@@ -26,115 +26,125 @@
  *****************************************************************************/
 package jonelo.jacksum.algorithm;
 
+import jonelo.jacksum.adapt.gnu.crypto.hash.HashFactory;
+import jonelo.jacksum.adapt.gnu.crypto.hash.IMessageDigest;
 import java.security.NoSuchAlgorithmException;
-import gnu.crypto.hash.*;
+
+/**
+ * A class that can be used to compute the eDonkey of a data stream.
+ */
 
 public class Edonkey extends AbstractChecksum {
 
-	private final static String AUX_ALGORITHM = "md4";
+    private final static String AUX_ALGORITHM = "md4";
+    private IMessageDigest md4 = null;
+    private IMessageDigest md4final = null;
+    private boolean virgin=true;
 
-	private IMessageDigest md4 = null;
 
-	private IMessageDigest md4final = null;
+    private final static int BLOCKSIZE = 9728000; // 9500 * 1024;
+    private byte[] edonkeyHash = new byte[16]; // 16 bytes, 128 bits
+    private byte[] digest = null;
 
-	private final static int BLOCKSIZE = 9728000; // 9500 * 1024;
+    /** Creates a new Edonkey object */
+    public Edonkey() throws NoSuchAlgorithmException {
+        super();
+        separator=" ";
+        encoding=HEX;
+        md4 = HashFactory.getInstance(AUX_ALGORITHM);
+        if (md4 == null) throw new NoSuchAlgorithmException(AUX_ALGORITHM + " is an unknown algorithm.");
+        md4final = HashFactory.getInstance(AUX_ALGORITHM);
+        virgin=true;
+    }
 
-	private byte[] edonkeyHash = new byte[16]; // 16 bytes, 128 bits
+    public void reset() {
+        md4.reset();
+        md4final.reset();
+        length=0;
+        virgin=true;
+    }
 
-	/** Creates a new Edonkey object */
-	public Edonkey() throws NoSuchAlgorithmException {
-		super();
-		BUFFERSIZE = 4096; // 4 * 1024
-		separator = " ";
-		hex = true;
-		md4 = HashFactory.getInstance(AUX_ALGORITHM);
-		if (md4 == null)
-			throw new NoSuchAlgorithmException(AUX_ALGORITHM
-					+ " is an unknown algorithm.");
-		md4final = HashFactory.getInstance(AUX_ALGORITHM);
-	}
+    public void update(byte b) {
+        md4.update(b);
+        length++;
 
-	public void reset() {
-		md4.reset();
-		md4final.reset();
-		length = 0;
-	}
+        if ((length % BLOCKSIZE) == 0) {
+          System.arraycopy(md4.digest(), 0, edonkeyHash, 0, 16);
+          md4final.update(edonkeyHash,0,16);
+          md4.reset();
+        }
+    }
 
-	public void update(byte b) {
-		md4.update(b);
-		length++;
+    public void update(int b) {
+        update((byte)(b & 0xFF));
+    }
 
-		if ((length % BLOCKSIZE) == 0) {
-			System.arraycopy(md4.digest(), 0, edonkeyHash, 0, 16);
-			md4final.update(edonkeyHash, 0, 16);
-			md4.reset();
-		}
-	}
+    public void update(byte[] buffer, int offset, int len) {
+        int zuSchreiben = len-offset; // XXX
+        int passed = (int)(length % BLOCKSIZE);
+        int platz = BLOCKSIZE-passed;
 
-	public void update(byte[] buffer, int offset, int len) {
-		int zuSchreiben = len - offset; // XXX
-		int passed = (int) (length % BLOCKSIZE);
-		int platz = BLOCKSIZE - passed;
+        // |___________XXX....|_____
+        if (platz > zuSchreiben) {
+           md4.update(buffer,offset,len);
+           length+=len;
+        } else
+        // |_______________XXX|_____
+        if (platz == zuSchreiben) {
+          md4.update(buffer,offset,len);
+          length+=len;
+          System.arraycopy(md4.digest(), 0, edonkeyHash, 0, 16);
+          md4final.update(edonkeyHash,0,16);
+          md4.reset();
+        } else
+        // |________________XX|X____
+        if (platz < zuSchreiben) {
+          md4.update(buffer,offset,platz);
+          length+=platz;
 
-		// |___________XXX....|_____
-		if (platz > zuSchreiben) {
-			md4.update(buffer, offset, len);
-			length += len;
-		} else
-		// |_______________XXX|_____
-		if (platz == zuSchreiben) {
-			md4.update(buffer, offset, len);
-			length += len;
-			System.arraycopy(md4.digest(), 0, edonkeyHash, 0, 16);
-			md4final.update(edonkeyHash, 0, 16);
-			md4.reset();
-		} else
-		// |________________XX|X____
-		if (platz < zuSchreiben) {
-			md4.update(buffer, offset, platz);
-			length += platz;
+          System.arraycopy(md4.digest(), 0, edonkeyHash, 0, 16);
+          md4final.update(edonkeyHash,0,16);
+          md4.reset();
 
-			System.arraycopy(md4.digest(), 0, edonkeyHash, 0, 16);
-			md4final.update(edonkeyHash, 0, 16);
-			md4.reset();
+          md4.update(buffer,offset+platz,zuSchreiben-platz);
+          length+=zuSchreiben-platz;
+        }
 
-			md4.update(buffer, offset + platz, zuSchreiben - platz);
-			length += zuSchreiben - platz;
-		}
+    }
 
-	}
+    public String toString() {
+        return getFormattedValue()  + separator +
+        (isTimestampWanted() ? getTimestampFormatted() + separator : "")+
+        getFilename();
+    }
 
-	public String toString() {
-		return getHexValue()
-				+ separator
-				+ (isTimestampWanted() ? getTimestampFormatted() + separator
-						: "") + getFilename();
-	}
+    public byte[] getByteArray() {
+        if (virgin) {
+          if (length < BLOCKSIZE) {
+              // if only one block, partial md4 hash = final hash
+              System.arraycopy(md4.digest(), 0, edonkeyHash, 0, 16);
+          } else {
+              // let's copy the md4final object first
+              // so we can launch getHexValue multiple times
+              IMessageDigest md4temp = (IMessageDigest)md4final.clone();
 
-	/**
-	 * Gets the string representation for the edonkey hash.
-	 * 
-	 * @return A string which represents the edonkey hash.
-	 */
-	public String getHexValue() {
-		if (length < BLOCKSIZE) {
-			// if only one block, partial md4 hash = final hash
-			System.arraycopy(md4.digest(), 0, edonkeyHash, 0, 16);
-		} else {
-			// let's copy the md4final object first
-			// so we can launch getHexValue multiple times
-			IMessageDigest md4temp = (IMessageDigest) md4final.clone();
+              // if more then one block, final hash = hash of all partial hashes
+              md4temp.update(md4.digest(), 0, 16);
+              System.arraycopy(md4temp.digest(), 0, edonkeyHash, 0, 16);
+          }
+          virgin=false;
+          digest=edonkeyHash;
+        }
+        // we don't expose internal representations
+        byte[] save = new byte[digest.length];
+        System.arraycopy(digest,0,save,0,digest.length);
+        return save;
+    }
 
-			// if more then one block, final hash = hash of all partial hashes
-			md4temp.update(md4.digest(), 0, 16);
-			System.arraycopy(md4temp.digest(), 0, edonkeyHash, 0, 16);
-		}
-		return Service.format(edonkeyHash, uppercase);
-	}
-
-	/*
-	 * Testcase: a 3 GB file (length=3221225472), filled with random bytes (Java
-	 * seed=0), returns the value 0121DA2F201ADA2E2AC81DB26F8DA5EC
-	 */
+   /*
+     Testcase:
+     a 3 GB file (length=3221225472), filled with random bytes
+     (Java seed=0), returns the value 0121DA2F201ADA2E2AC81DB26F8DA5EC
+   */
 
 }

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- * Jacksum version 1.5.0 - checksum utility in Java
- * Copyright (C) 2001-2004 Dipl.-Inf. (FH) Johann Nepomuk Loefflmann,
+ * Jacksum version 1.7.0 - checksum utility in Java
+ * Copyright (C) 2001-2006 Dipl.-Inf. (FH) Johann Nepomuk Loefflmann,
  * All Rights Reserved, http://www.jonelo.de
  *
  * This program is free software; you can redistribute it and/or
@@ -23,39 +23,52 @@
  *****************************************************************************/
 
 package jonelo.jacksum.algorithm;
+/**
+ * A class that can be used to compute the Cksum of a data stream.
+ * This implementation uses the class java.util.zip.CRC32 from the Java Standard API.
+ */
 
 import java.util.zip.CRC32;
 
 public class Crc32 extends AbstractChecksum {
 
-	private CRC32 crc32 = null;
+    private CRC32 crc32 = null;
 
-	public Crc32() {
-		super();
-		crc32 = new CRC32();
-	}
+    public Crc32() {
+        super();
+        crc32 = new CRC32();
+    }
 
-	public void reset() {
-		crc32.reset();
-		length = 0;
-	}
+    public void reset() {
+        crc32.reset();
+        length = 0;
+    }
 
-	public void update(byte[] buffer, int offset, int len) {
-		crc32.update(buffer, offset, len);
-		length += len;
-	}
+    public void update(byte[] buffer, int offset, int len) {
+        crc32.update(buffer, offset, len);
+        length += len;
+    }
 
-	public void update(int b) {
-		crc32.update(b);
-		length++;
-	}
+    public void update(int b) {
+        crc32.update(b);
+        length++;
+    }
 
-	public long getValue() {
-		return crc32.getValue();
-	}
+    public void update(byte b) {
+        update((int)(b & 0xFF));
+    }
 
-	public String getHexValue() {
-		String s = Service.hexformat(getValue(), 8);
-		return (uppercase ? s.toUpperCase() : s);
-	}
+    public long getValue() {
+        return crc32.getValue();
+    }
+
+    public byte[] getByteArray() {
+        long val = crc32.getValue();
+        return new byte[]
+        {(byte)((val>>24)&0xff),
+         (byte)((val>>16)&0xff),
+         (byte)((val>>8)&0xff),
+         (byte)(val&0xff)};
+    }
+
 }

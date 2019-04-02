@@ -1,7 +1,7 @@
 /******************************************************************************
  *
- * Sugar for Java 1.2.1
- * Copyright (C) 2001-2004  Dipl.-Inf. (FH) Johann Nepomuk Loefflmann,
+ * Sugar for Java 1.3
+ * Copyright (C) 2001-2005  Dipl.-Inf. (FH) Johann Nepomuk Loefflmann,
  * All Rights Reserved, http://www.jonelo.de
  *
  * This library is free software; you can redistribute it and/or
@@ -24,74 +24,76 @@
 
 package jonelo.sugar.util;
 
-import java.util.*;
+import java.util.StringTokenizer;
 
-public class Version implements Comparable {
-	private int major, sub, minor;
 
-	public Version(int major, int sub) {
-		this(major, sub, 0);
-	}
+public class Version implements Comparable
+{
+  private int
+    major,
+    sub,
+    minor;
 
-	public Version(int major, int sub, int minor) {
-		this.major = major;
-		this.sub = sub;
-		this.minor = minor;
-	}
+  public Version(int major, int sub) {
+    this(major, sub, 0);
+  }
 
-	public Version(String version) {
-		major = 0;
-		sub = 0;
-		minor = 0;
-		StringTokenizer st = new StringTokenizer(version, ".");
-		if (st.hasMoreTokens())
-			major = Integer.parseInt(st.nextToken());
-		if (st.hasMoreTokens())
-			sub = Integer.parseInt(st.nextToken());
-		if (st.hasMoreTokens())
-			minor = Integer.parseInt(st.nextToken());
-	}
+  public Version(int major, int sub, int minor) {
+    this.major=major;
+    this.sub=sub;
+    this.minor=minor;
+  }
 
-	public String toString() {
-		return (major + "." + sub + "." + minor);
-	}
+  public Version(String version) {
+    major=0; sub=0; minor=0;
+    StringTokenizer st = new StringTokenizer(version,".");
+    if (st.hasMoreTokens()) major = Integer.parseInt(st.nextToken());
+    if (st.hasMoreTokens()) sub = Integer.parseInt(st.nextToken());
+    if (st.hasMoreTokens()) minor = Integer.parseInt(st.nextToken());
+  }
 
-	public int getMajor() {
-		return major;
-	}
+  public String toString() {
+    StringBuffer sb = new StringBuffer(8); // XX.YY.ZZ
+    sb.append(major);
+    sb.append('.');
+    sb.append(sub);
+    sb.append('.');
+    sb.append(minor);
+    return sb.toString();
+  }
 
-	public int getSub() {
-		return sub;
-	}
+  public int getMajor() {
+    return major;
+  }
 
-	public int getMinor() {
-		return minor;
-	}
+  public int getSub() {
+    return sub;
+  }
 
-	public int compareTo(Object o) {
-		Version v = (Version) o;
-		if (this.equals(v))
-			return 0;
+  public int getMinor() {
+    return minor;
+  }
 
-		if ((major > v.getMajor())
-				|| ((major == v.getMajor()) && (sub > v.getSub()))
-				|| ((major == v.getMajor()) && (sub == v.getSub()) && (minor > v
-						.getMinor())))
-			return 1;
-		else
-			return -1;
-	}
+  public int compareTo(Object o) {
+    Version v = (Version)o;
+    if (this.equals(v)) return 0;
 
-	public boolean equals(Object o) {
-		if (!(o instanceof Version))
-			return false;
-		Version v = (Version) o;
-		return ((major == v.getMajor()) && (sub == v.getSub()) && (minor == v
-				.getMinor()));
-	}
+    if (
+         (major > v.getMajor()) ||
+       ( (major == v.getMajor()) && (sub > v.getSub()) ) ||
+       ( (major == v.getMajor()) && (sub == v.getSub()) && (minor > v.getMinor()) )
+    ) return 1;
+    else return -1;
+  }
 
-	public int hashCode() {
-		return major * 10000 + sub * 100 + minor;
-	}
+  public boolean equals(Object o) {
+    if (!(o instanceof Version)) return false;
+    Version v = (Version)o;
+    return ((major == v.getMajor()) && (sub == v.getSub()) && (minor == v.getMinor()));
+  }
+
+  public int hashCode() {
+     return major*10000+sub*100+minor;
+  }
 
 }
